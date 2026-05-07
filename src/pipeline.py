@@ -3,70 +3,57 @@ from extraction import extract_all_pdfs
 from chunking import chunk_text
 from embeddings import create_embeddings
 from faiss_db import FAISSVectorDB
+from _markers import Marker
+
+PDF_FOLDER = "data/pdfs"
+VECTOR_DB_PATH = "vector_db"
+_TOTAL_STEPS = 4
 
 
 def main():
+    # Create output directory upfront — fail fast before any expensive work.
+    os.makedirs(VECTOR_DB_PATH, exist_ok=True)
 
-    pdf_folder = "data/pdfs"
-    vector_path = "vector_db"
+    step = 0
 
-    print("\nSTEP 1: Extracting text from PDFs\n")
-
-    data = extract_all_pdfs(pdf_folder)
-
+    step += 1
+    print(f"\n[{step}/{_TOTAL_STEPS}] Extracting text from PDF(s)...\n")
+    data = extract_all_pdfs(PDF_FOLDER)
     if not data:
-        print("No PDFs found.")
+        print(f"{Marker.HEAVY_CROSS} No PDFs found. Exiting.")
         return
+    print(f"\n{Marker.HEAVY_CHECK} Extracted {len(data)} PDF file(s)")
 
-    print(f"Extracted {len(data)} PDF files")
-
-    print("\nSTEP 2: Chunking documents\n")
-
-    all_chunks = []
-
+    step += 1
+    print(f"\n[{step}/{_TOTAL_STEPS}] Chunking documents...\n")
+    all_chunks: list[dict] = []
     for doc in data:
-
         if not doc["content"].strip():
+            print(f"  {Marker.SKIP} {doc['source']} → skipped (no text extracted)")
             continue
+        text_chunks = chunk_text(doc["content"])
+        print(f"  {Marker.CHECK} {doc['source']} → {len(text_chunks)} chunks")
+        for text in text_chunks:
+            all_chunks.append({"text": text, "source": doc["source"]})
 
-        chunks = chunk_text(doc["content"])
-
-        print(f"{doc['source']} → {len(chunks)} chunks")
-
-        all_chunks.extend(chunks)
-
-    print(f"\nTotal chunks created: {len(all_chunks)}")
-
-    if len(all_chunks) == 0:
-        print("No chunks created. Exiting.")
+    if not all_chunks:
+        print(f"\n{Marker.HEAVY_CROSS} No chunks created. Exiting.")
         return
+    print(f"\n{Marker.HEAVY_CHECK} Total chunks: {len(all_chunks)}")
 
-    print("\nSTEP 3: Creating embeddings (this may take a few minutes)\n")
+    step += 1
+    print(f"\n[{step}/{_TOTAL_STEPS}] Creating embeddings...\n")
+    texts_only = [c["text"] for c in all_chunks]
+    embeddings = create_embeddings(texts_only)
+    dim = embeddings.shape[1]
 
-    # Show chunk count before embedding
-    print(f"Embedding {len(all_chunks)} chunks...")
-
-    embeddings = create_embeddings(all_chunks)
-
-    print("\nEmbeddings created successfully")
-    print(f"Total embeddings: {len(embeddings)}")
-
-    dim = len(embeddings[0])
-
-    print("\nSTEP 4: Building FAISS vector database\n")
-
+    step += 1
+    print(f"\n[{step}/{_TOTAL_STEPS}] Building FAISS index...\n")
     db = FAISSVectorDB(dim)
-
-    print("Adding embeddings to FAISS index...")
     db.add(embeddings, all_chunks)
+    db.save(VECTOR_DB_PATH)
 
-    os.makedirs(vector_path, exist_ok=True)
-
-    print("Saving FAISS index...")
-    db.save(vector_path)
-
-    print("\nVector database saved successfully.")
-    print(f"Location: {vector_path}")
+    print(f"{Marker.HEAVY_CHECK} Done. Vector database saved to: {VECTOR_DB_PATH}\n")
 
 
 if __name__ == "__main__":
