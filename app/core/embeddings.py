@@ -1,24 +1,24 @@
 import os
 import torch
-from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from transformers.utils import logging as hf_logging
-from _markers import Marker
+from app.config import settings
+from app.core.markers import Marker
 
-load_dotenv()
+# pydantic-settings populates settings.hf_token from .env but does not write
+# it back into os.environ. huggingface_hub reads only os.environ, so we bridge
+# the gap here before the model is loaded.
+if settings.hf_token and not os.environ.get("HF_TOKEN"):
+    os.environ["HF_TOKEN"] = settings.hf_token
 
-# Suppress noisy "unexpected keys" warnings emitted by transformers when
-# loading sentence-transformer weights.
+# Suppress noisy "unexpected keys" warnings from transformers.
 hf_logging.set_verbosity_error()
 
 _device = "cuda" if torch.cuda.is_available() else "cpu"
 
 if _device == "cpu":
-    # Maximize parallelism for CPU-bound encoding.
     torch.set_num_threads(os.cpu_count() or 4)
 
-# Standard PyTorch backend; avoids version friction between `optimum` and
-# `transformers` that arises when using the ONNX export path.
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device=_device)
 
 EMBEDDING_DIM: int = model.get_embedding_dimension()

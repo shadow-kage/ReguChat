@@ -7,9 +7,7 @@ import pickle
 class FAISSVectorDB:
     """
     Wraps a FAISS flat-L2 index with a parallel list of chunk metadata dicts.
-    Each stored item is expected to be {"text": str, "source": str}, though
-    the class is agnostic to the dict shape — it stores and returns whatever
-    is passed in.
+    Stored chunks are expected to be {"text": str, "source": str}.
     """
 
     def __init__(self, dim: int):
@@ -27,7 +25,7 @@ class FAISSVectorDB:
 
         results = []
         for idx, dist in zip(indices[0], distances[0]):
-            # FAISS returns -1 for slots when k > number of stored vectors.
+            # FAISS returns -1 for unfilled slots when k > stored vector count.
             if idx == -1:
                 continue
             results.append((self.chunks[idx], float(dist)))

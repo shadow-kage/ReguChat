@@ -1,7 +1,9 @@
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import fitz  # PyMuPDF
-from _markers import Marker
+
+from app.core.markers import Marker
 
 
 def extract_text_from_pdf(pdf_path: str) -> str:
@@ -32,7 +34,10 @@ def extract_all_pdfs(folder: str) -> list[dict]:
         return []
 
     def process_file(filename: str) -> dict:
-        result = {"source": filename, "content": extract_text_from_pdf(os.path.join(folder, filename))}
+        result = {
+            "source": filename,
+            "content": extract_text_from_pdf(os.path.join(folder, filename)),
+        }
         print(f"  {Marker.CHECK} {filename}")
         return result
 
