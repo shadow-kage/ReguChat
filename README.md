@@ -236,6 +236,12 @@ curl -N -X POST http://localhost:8000/query/stream \
 
 ## Full Docker deployment
 
+**Prerequisites** — complete these from the local-setup section first:
+- **Step 1** — clone the repo and create `.env` with your API keys
+- **Step 3** — drop your source PDFs into `data/<domain>/`
+
+You can skip steps 2 and 4–7; Docker handles the Python environment, indexer, Redis, backend, and frontend itself.
+
 The indexer must run before the API so the FAISS index exists on disk.
 
 ```bash
