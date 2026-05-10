@@ -1,0 +1,28 @@
+:root {
+  /* Paper */
+  --paper:          #f8f5f0;
+  --paper-warm:     rgba(200, 190, 175, 0.15);
+  --paper-shadow:   rgba(40, 30, 20, 0.35);
+
+  /* Ink scale */
+  --ink:            #2b2418;
+  --ink-soft:       #3d3528;
+  --ink-muted:      #5a4a30;
+  --ink-faded:      #8a7754;
+  --ink-ghost:      #a89570;
+
+  /* Borders / rules */
+  --rule:           rgba(139, 115, 75, 0.4);
+  --rule-soft:      rgba(139, 115, 75, 0.25);
+
+  /* Chat bubbles */
+  --bubble-bot-bg:  rgba(255, 255, 255, 0.55);
+  --bubble-bot-bd:  rgba(139, 115, 75, 0.25);
+
+  /* Book cover base colour */
+  --cover:          #b84055;
+
+  /* Fonts */
+  --font-display:   'Manrope', system-ui, sans-serif;
+  --font-body:      'Inter', system-ui, sans-serif;
+}

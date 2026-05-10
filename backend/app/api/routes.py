@@ -52,8 +52,7 @@ async def query_stream(request: QueryRequest):
         raise HTTPException(status_code=400, detail="Query must not be empty.")
 
     async def event_generator():
-        async for chunk in stream_query(request.domain_id, request.query):
-            yield f"data: {json.dumps({'text': chunk})}\n\n"
-        yield f"data: {json.dumps({'done': True})}\n\n"
+        async for event in stream_query(request.domain_id, request.query):
+            yield f"data: {json.dumps(event)}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")

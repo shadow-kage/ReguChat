@@ -20,6 +20,10 @@ __pycache__/
 # Private dev instructions
 CLAUDE.local.md
 
+# Frontend build artifacts
+node_modules/
+frontend/dist/
+
 # IDE & OS noise
 .vscode/
 .idea/

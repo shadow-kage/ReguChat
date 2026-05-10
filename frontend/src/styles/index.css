@@ -1,0 +1,15 @@
+* {
+  box-sizing: border-box;
+}
+
+button {
+  font: inherit;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink-soft);
+  background: #1c1612;
+  -webkit-font-smoothing: antialiased;
+}

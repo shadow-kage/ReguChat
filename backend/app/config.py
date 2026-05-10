@@ -16,5 +16,10 @@ class Settings(BaseSettings):
 
     domains_dir: str = "domains"
 
+    # Comma-separated list of origins the browser is allowed to reach the API from.
+    # In Docker the frontend nginx proxy makes CORS unnecessary, but it's required
+    # for the Vite dev server (port 5173) talking directly to uvicorn (port 8000).
+    cors_allowed_origins: str = "http://localhost:5173"
+
 
 settings = Settings()
